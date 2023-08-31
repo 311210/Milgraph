@@ -36,7 +36,7 @@ def handle_conversion():
 
         return output
     except Exception as e:
-        print("Error:", e)  # Wyświetlenie błędu w konsoli
+        print("Error:", e)  
         return jsonify({'error': str(e)})
 @app.route('/visualization', methods=['POST'])
 def handle_visualization():
