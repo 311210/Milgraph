@@ -2,7 +2,7 @@
 from flask_cors import CORS
 from flask import Flask, request, jsonify
 import json
-from graph_conversion import graph_vis_v,graph_vis_e,create_graph_from_edgelist, create_graph_from_adjacency_list, create_graph_from_adjacency_matrix,graph_to_adjacency_list_string,graph_to_adjacency_matrix_string,graph_to_edge_list_string
+from graph_conversion import graph_info, graph_to_java_edge_list_string, graph_to_java_adjacency_matrix_string, graph_to_python_adjacency_list_string,graph_to_python_adjacency_matrix_string,graph_to_python_edge_list_string,graph_to_java_edge_list_string, graph_vis_v,graph_vis_e,create_graph_from_edgelist, create_graph_from_adjacency_list, create_graph_from_adjacency_matrix,graph_to_adjacency_list_string,graph_to_adjacency_matrix_string,graph_to_edge_list_string
 
 
 app = Flask(__name__)
@@ -32,9 +32,32 @@ def handle_conversion():
             print(output)
         
         elif data.get('selectedOptionOutput') == 'adjacencyListOutput':
-            output = graph_to_adjacency_list_string(g,data.get('ancestorSeparatorOutput'),data.get('separator'),data.get('weightSeparator'))
+            output = graph_to_adjacency_list_string(g,data.get('ancestorSeparatorOutput'),data.get('separatorOutput'),data.get('weightSeparator'))
 
-        return output
+        elif data.get('selectedOptionOutput') == 'javaEdgeListOutput':
+            output = graph_to_java_edge_list_string(g)
+
+        elif data.get('selectedOptionOutput') == 'pythonEdgeListOutput':
+            output = graph_to_python_edge_list_string(g)
+
+
+        elif data.get('selectedOptionOutput') == 'pythonAdjacencyListOutput':
+            output = graph_to_python_adjacency_list_string(g)
+
+        elif data.get('selectedOptionOutput') == 'javaAdjacencyMatrixOutput':
+            output = graph_to_java_adjacency_matrix_string(g)
+
+        elif data.get('selectedOptionOutput') == 'pythonAdjacencyMatrixOutput':
+            output = graph_to_python_adjacency_matrix_string(g)
+
+        info=graph_info
+
+        to_front = {
+            'info': info,
+            'output': output,
+        }
+
+        return jsonify(to_front)
     except Exception as e:
         print("Error:", e)  
         return jsonify({'error': str(e)})
@@ -57,7 +80,6 @@ def handle_visualization():
         
         v = graph_vis_v(g)
         e = graph_vis_e(g,data.get('weighted'))
-
 
         return jsonify({'nodes': v, 'edges': e})
     except Exception as e:

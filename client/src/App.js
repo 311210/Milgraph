@@ -15,7 +15,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/converter" element={<Converter />} />
           <Route path="/visualization" element={<Visualization />} />
-          <Route path="/What" element={<What />} />
+          <Route path="/what" element={<What />} />
         </Routes>
       </div>
     </>

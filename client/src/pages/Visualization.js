@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, MenuItem, Select, TextField, InputLabel, FormControl,ThemeProvider} from '@mui/material';
-import Graph from 'react-graph-vis';
+import Graph from './Graph';
 import "../styles.css";
 import theme from './theme';
 import axios from 'axios';
+import { useLocation } from 'react-router-dom'
+import html2canvas from 'html2canvas';
 export default function Visualization() {
     const [selectedOption, setSelectedOption] = useState('');
     const [separator, setSeparator] = useState(',');
@@ -14,6 +16,9 @@ export default function Visualization() {
     const [directed, setDirected] = useState(false);
     const [input, setInput] = useState('');
     const [graphData, setgraphData] = useState({ nodes: [], edges: [] });
+    const [showGraph, setShowGraph] = useState(false);
+    const [imgUrl, setImgUrl] = useState(null); // Nowy stan do przechowywania URL obrazu
+    const location =useLocation();
     const options = {
       physics: {
 
@@ -24,6 +29,7 @@ export default function Visualization() {
 
       },
       edges: {
+        
         color: '#fff',
         width: 3,
         arrows: {
@@ -78,8 +84,9 @@ export default function Visualization() {
     const handleDirectedChange = () => {
       setDirected(!directed);
     };
-  
+
     const handleSubmit = async () => {
+
       const requestData = {
         selectedOption:selectedOption,
         separator:separator,
@@ -95,12 +102,39 @@ export default function Visualization() {
         const response = await axios.post('/visualization', requestData);
         console.log(response);
         setgraphData(response.data);
+        setShowGraph(true);
       } catch (error) {
         console.error('Error sending data to Flask:', error);
       }
 
     };
-  
+    useEffect(() => {
+      if(location && location.state){
+          setSelectedOption(location.state.selectedOption)
+          setSeparator( location.state.separator)
+          setweightSeparator(location.state.weightSeparator)
+          setancestorSeparator(location.state.ancestorSeparator)
+          setShowVertexName(location.state.showVertexName)
+          setWeighted(location.state.weighted)
+          setDirected(location.state.directed)
+          setInput(location.state.input)
+
+      }
+      }, []);
+      const handleCaptureImage = () => {
+        const elementToCapture = document.getElementById('elementToCapture');
+    
+        html2canvas(elementToCapture).then(function (canvas) {
+          const imageUrl = canvas.toDataURL('image/jpeg');
+    
+          // Ustaw wynikową URL obrazu w stanie komponentu
+          setImgUrl(imageUrl);
+          const a = document.createElement('a');
+          a.href = imageUrl;
+          a.download = 'przechwycony_obraz.jpg';
+          a.click();
+        });
+      };
     return (
       <ThemeProvider theme={theme}>
       <div class="grid-container-2">
@@ -133,14 +167,14 @@ export default function Visualization() {
           <Button  style={{ 'margin-top': '12px' }} color="warning" className='inside' variant="contained" fullWidth onClick={handleDirectedChange}>
               {directed ? 'Directed' : 'Undirected'}
             </Button>
-          
+            <Button defaultValue={false} style={{ 'margin-top': '12px' }} color="warning" variant="contained" fullWidth onClick={handleWeightedChange}>
+              {weighted ? 'Weighted' : 'Unweighted'}
+            </Button>
             
 
           {selectedOption === 'edgeList' && (
           <div>
-            <Button defaultValue={false} style={{ 'margin-top': '12px' }} color="warning" variant="contained" fullWidth onClick={handleWeightedChange}>
-              {weighted ? 'Weighted' : 'Unweighted'}
-            </Button>
+
             <TextField
               disabled={!weighted}
               label="Weight Separator"
@@ -163,6 +197,7 @@ export default function Visualization() {
              
             />
             <TextField
+
               label="Input"
               value={input}
               onChange={handleInputChange}
@@ -212,9 +247,7 @@ export default function Visualization() {
 
           {selectedOption === 'adjacencyList' && (
           <div>
-            <Button defaultValue={false} style={{ 'margin-top': '12px' }} color="warning" variant="contained" fullWidth onClick={handleWeightedChange}>
-              {weighted ? 'Weighted' : 'Unweighted'}
-            </Button>
+
             <TextField
               disabled={!weighted}
               label="Weight Separator"
@@ -267,14 +300,27 @@ export default function Visualization() {
 
       <div class="grid-child ">
         <Button onClick={handleSubmit} variant="contained" style={{ 'margin-top': '12px' }} color="success" disabled={selectedOption===''}>Show Graph</Button>
+        <Button
+            variant="contained" 
+            disabled={!showGraph}
+            style={{ 'margin-top': '12px' }} 
+            color="success"
+            onClick={handleCaptureImage}
+          >
+            Generate JPG
+          </Button>
+          
       </div>        
 
 
 
 
-      <div class="grid-child "> 
-      <div style={{ height: '1000px' }}>
-      <Graph graph={graphData} options={options} />
+      <div class="grid-child " > 
+      <div style={{ height: '800px' }} id="elementToCapture">
+      {showGraph && <Graph graphData={graphData} graphOptions={options} />}
+
+
+
       </div>
       
       

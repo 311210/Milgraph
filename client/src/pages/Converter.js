@@ -3,6 +3,7 @@ import { Button, MenuItem, Select, TextField, InputLabel, FormControl,ThemeProvi
 import "../styles.css";
 import theme from './theme';
 import axios from 'axios';
+import { Link, useNavigate } from "react-router-dom";
 export default function Converter() {
     const [selectedOption, setSelectedOption] = useState('');
     const [separator, setSeparator] = useState(',');
@@ -21,6 +22,7 @@ export default function Converter() {
     const [showVertexNameOutput, setShowVertexNameOutput] = useState(false);
 
     const [output, setOutput] = useState('');
+    const [info, setInfo] = useState('');
 
 
     const handleOptionChange = (event) => {
@@ -74,6 +76,11 @@ export default function Converter() {
       const output = event.target.value;
       setOutput(output);
     };
+
+    const handleInfoChange = (event) => {
+      const output = event.target.value;
+      setInfo(output);
+    };
   
     const handleShowVertexNameChangeOutput = () => {
       setShowVertexNameOutput(!showVertexNameOutput);
@@ -90,6 +97,24 @@ export default function Converter() {
     const handleDirectedChange = () => {
       setDirected(!directed);
     };
+
+    let navigate = useNavigate(); 
+    const routeChange = () =>{ 
+ 
+      navigate('/Visualization', {
+        state: {
+          selectedOption:selectedOption,
+          separator:separator,
+          weightSeparator:weightSeparator,
+          ancestorSeparator:ancestorSeparator,
+          showVertexName:showVertexName,
+          weighted:weighted,
+          directed:directed,
+          input:input,
+
+        }
+      });
+    }
   
     const handleSubmit = async () => {
       const requestData = {
@@ -109,8 +134,11 @@ export default function Converter() {
       
       try {
         const response = await axios.post('/convert', requestData);
-        console.log(response)
-        setOutput(response.data);
+        const outputData = response.data.output;
+        const infoData = response.data.info;
+        console.log(response.data)
+        setOutput(outputData);
+        setInfo(infoData);
       } catch (error) {
         console.error('Error sending data to Flask:', error);
       }
@@ -149,14 +177,14 @@ export default function Converter() {
           <Button  style={{ 'margin-top': '12px' }} color="warning" className='inside' variant="contained" fullWidth onClick={handleDirectedChange}>
               {directed ? 'Directed' : 'Undirected'}
             </Button>
-          
+            <Button defaultValue={false} style={{ 'margin-top': '12px' }} color="warning" variant="contained" fullWidth onClick={handleWeightedChange}>
+              {weighted ? 'Weighted' : 'Unweighted'}
+            </Button>
             
 
           {selectedOption === 'edgeList' && (
           <div>
-            <Button defaultValue={false} style={{ 'margin-top': '12px' }} color="warning" variant="contained" fullWidth onClick={handleWeightedChange}>
-              {weighted ? 'Weighted' : 'Unweighted'}
-            </Button>
+
             <TextField
               disabled={!weighted}
               label="Weight Separator"
@@ -228,9 +256,7 @@ export default function Converter() {
 
           {selectedOption === 'adjacencyList' && (
           <div>
-            <Button defaultValue={false} style={{ 'margin-top': '12px' }} color="warning" variant="contained" fullWidth onClick={handleWeightedChange}>
-              {weighted ? 'Weighted' : 'Unweighted'}
-            </Button>
+
             <TextField
               disabled={!weighted}
               label="Weight Separator"
@@ -282,8 +308,22 @@ export default function Converter() {
 
 
       <div class="grid-child ">
-        <Button onClick={handleSubmit} variant="contained" style={{ 'margin-top': '12px' }} color="success" disabled={selectedOption=='' || selectedOptionOutput==''}>Convert</Button>
-      </div>        
+        <Button onClick={handleSubmit} variant="contained" style={{ 'margin-top': '12px', 'marginRight':'20px' }} color="success" disabled={selectedOption=='' || selectedOptionOutput==''}>Convert</Button>
+        <Button onClick={routeChange} variant="contained" style={{ 'margin-top': '12px' }} color="success" disabled={selectedOption=='' || selectedOptionOutput==''}>Show Graph</Button>
+        <TextField
+              label="Graph Info"
+              value={info}
+              onChange={handleInfoChange}
+              fullWidth
+          color="warning"
+          focused
+          multiline
+          rows={10}
+          style={{ 'margin-top': '100px', }}
+             
+            />
+      </div>   
+           
 
 
 
@@ -310,6 +350,11 @@ export default function Converter() {
         <MenuItem value="edgeListOutput">Edge List</MenuItem>
         <MenuItem value="adjacencyMatrixOutput">Adjacency Matrix</MenuItem>
         <MenuItem value="adjacencyListOutput">Adjacency List</MenuItem>
+        <MenuItem value="javaEdgeListOutput">Java Edge List</MenuItem>
+        <MenuItem value="pythonEdgeListOutput">Python Edge List</MenuItem>
+        <MenuItem value="pythonAdjacencyListOutput">Python Adjacency List</MenuItem>
+        <MenuItem value="javaAdjacencyMatrixOutput">Java Matrix List</MenuItem>
+        <MenuItem value="pythonAdjacencyMatrixOutput">Java Python List</MenuItem>
         </Select>
         </FormControl>
       </div>
@@ -434,6 +479,98 @@ export default function Converter() {
         
       </div>
       ) } 
+
+      {selectedOptionOutput === 'javaEdgeListOutput' && (
+            <div>
+              
+              <TextField
+                label="Output"
+                value={output}
+                onChange={handleOutputChange}
+                fullWidth
+                color="warning"
+                focused
+                multiline
+                rows={20}
+                style={{ 'margin-top': '12px' }}
+                
+              />
+              
+            </div>
+            ) }
+      {selectedOptionOutput === 'pythonEdgeListOutput' && (
+            <div>
+              
+              <TextField
+                label="Output"
+                value={output}
+                onChange={handleOutputChange}
+                fullWidth
+                color="warning"
+                focused
+                multiline
+                rows={20}
+                style={{ 'margin-top': '12px' }}
+                
+              />
+              
+            </div>
+            ) }
+
+            {selectedOptionOutput === 'pythonAdjacencyListOutput' && (
+            <div>
+              
+              <TextField
+                label="Output"
+                value={output}
+                onChange={handleOutputChange}
+                fullWidth
+                color="warning"
+                focused
+                multiline
+                rows={20}
+                style={{ 'margin-top': '12px' }}
+                
+              />
+              
+            </div>
+            ) }
+            {selectedOptionOutput === 'javaAdjacencyMatrixOutput' && (
+            <div>
+              
+              <TextField
+                label="Output"
+                value={output}
+                onChange={handleOutputChange}
+                fullWidth
+                color="warning"
+                focused
+                multiline
+                rows={20}
+                style={{ 'margin-top': '12px' }}
+                
+              />
+              
+            </div>
+            ) } 
+                        {selectedOptionOutput === 'pythonAdjacencyMatrixOutput' && (
+            <div>
+              
+              <TextField
+                label="Output"
+                value={output}
+                onChange={handleOutputChange}
+                fullWidth
+                color="warning"
+                focused
+                multiline
+                rows={20}
+                style={{ 'margin-top': '12px' }}
+                
+              />
+              
+            </div>
+            ) }  
   </div>      
   </div>
   </ThemeProvider>
